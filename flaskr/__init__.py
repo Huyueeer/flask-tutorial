@@ -1,6 +1,8 @@
 import os
 
 from flask import Flask
+from .extensions import scheduler
+
 
 def create_app(test_config=None):
     # 创建Flask实例
@@ -8,6 +10,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        SCHEDULER_API_ENABLED=True
     )
 
     if test_config is None:
@@ -38,4 +41,15 @@ def create_app(test_config=None):
     def hello():
         return 'Hello'
 
+    # 初始化APScheduler, 注意，需要import task任务所在的包
+    from . import task
+    scheduler.init_app(app)
+    scheduler.start()
+
     return app
+
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run()
